@@ -1,0 +1,79 @@
+<html>
+<head>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+
+  <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawOriginChart);
+      google.charts.setOnLoadCallback(drawPredictedChart);
+
+      function drawOriginChart() {
+        let dataArray = [['OriginData','OriginData']];
+        let year = 1988;
+        <% for (let i=0; i<originArr.length; i++) {%>
+          year++;
+          dataArray.push([year, <%= originArr[i] %>]);
+        <% } %>
+
+        let originData = google.visualization.arrayToDataTable(dataArray);
+        let originOptions = {
+          title: 'OriginArr',
+          hAxis: {title: 'Year',  titleTextStyle: {color: '#333'}},
+          vAxis: {minValue: 0}
+        };
+
+        const originChart = new google.visualization.AreaChart(document.getElementById('origin_chart'));
+        originChart.draw(originData, originOptions);
+      }
+      function drawPredictedChart() {
+        let dataArray = [['PredictedData','PredictedData']];
+        let year = 1988;
+        <% for (let i=0; i<predictedArr.length; i++) {%>
+          year++;
+          dataArray.push([year, <%= predictedArr[i] %>]);
+        <% } %>
+
+        let predictedData = google.visualization.arrayToDataTable(dataArray);
+        let predictedOptions = {
+          title: 'PredictedArr',
+          hAxis: {title: 'Year',  titleTextStyle: {color: '#333'}},
+          vAxis: {minValue: 0}
+        };
+
+        const predictedChart = new google.visualization.AreaChart(document.getElementById('predicted_chart'));
+        predictedChart.draw(predictedData, predictedOptions);
+      }
+
+  </script>
+</head>
+<body>
+
+  <div class="container">
+      <div class="row">
+          <div class="col s6 m6 l6">
+              <table>
+
+                  <tr>
+                      <th>Origin arr</th>
+                      <th>Predicted arr</th>
+                      <th>A Group</th>
+                  </tr>
+                  <% for (let i=0; i<originArr.length; i++) { %>
+                  <tr>
+                      <td><%= originArr[i] %></td>
+                      <td><%= predictedArr[i] %></td>
+                      <td><%= aGroupArr[i] %></td>
+                  </tr>
+                  <% } %>
+              </table>
+          </div>
+      </div>
+      <div id="origin_chart" style="height: 700px"></div>
+      <div id="predicted_chart" style="height: 700px"></div>
+  </div>
+
+
+</body>
+</html>

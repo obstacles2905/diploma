@@ -1,0 +1,21 @@
+{
+  "name": "diploma",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.18.2",
+    "chart.js": "^2.7.2",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "ejs": "~2.5.7",
+    "express": "~4.15.5",
+    "jquery": "^3.3.1",
+    "lodash": "^4.17.5",
+    "materialize-css": "^1.0.0-beta",
+    "morgan": "~1.9.0",
+    "serve-favicon": "~2.4.5"
+  }
+}
