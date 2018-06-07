@@ -1,6 +1,7 @@
 const _ = require("lodash");
 const ARRAY_CONST = 30;
 const INTERVALS_CONST = 5;
+const CROSSOVER_ITERATIONS = 400;
 const MIN = 10000;
 const MAX = 17000;
 const MAX_ORIGIN = 20000;
@@ -8,14 +9,18 @@ const MAX_ORIGIN = 20000;
 let Controller = function(){}
 
 Controller.index = function (req, res) {
-  const initialArr = _generateInitialData();
-  const resultArr = _generatePredictedData();
+  const initialArr = _generateInitialData(ARRAY_CONST);
+  const resultArr = _generatePredictedData(ARRAY_CONST);
 
+  let crossoverArr = _crossOver(resultArr);
+  const MSEarr = _calculateMSE(initialArr, crossoverArr);
+  crossoverArr = _assignMSE(crossoverArr, MSEarr);
+  crossoverArr = _optimize(crossoverArr);
   //res.render('index', { originArr: originArr, predictedArr: predictedArr, aGroupArr: aGroupArr });
 };
 
-function _generateInitialData() {
-  const data = _fillDataToArray();
+function _generateInitialData(arrLength) {
+  const data = _fillDataToArray(arrLength);
   let intervals = [];
 
   data.forEach(chromosome => { 
@@ -24,11 +29,11 @@ function _generateInitialData() {
     intervals.push(interval);
   });
 
-  return interval;
+  return intervals;
 }
 
-function _generatePredictedData() {
-  const data = _fillDataToArray();
+function _generatePredictedData(arrLength) {
+  const data = _fillDataToArray(arrLength);
   const selectedInterval = _generateInterval(data[0]);
   let intervals = [];
   let lingValues = [];
@@ -56,10 +61,10 @@ function _generatePredictedData() {
 
 }
 
-function _fillDataToArray() {
+function _fillDataToArray(arrLength) {
   const array = [];
 
-  for (let i=0; i<ARRAY_CONST; i++) {
+  for (let i=0; i<arrLength; i++) {
     array.push(_.random(MIN, MAX));
   }
   return array.sort();
@@ -107,6 +112,62 @@ function _generateAGroup(chromosome, intervals) {
       right = intervals[i+1];
     }
   }
+}
+
+function _crossOver(data) {
+  const intervals = data.intervals;
+
+  for(let i=0; i<CROSSOVER_ITERATIONS; i++) {
+    let chosenChromosome1Index = _.random(0, intervals.length-1);
+    let chosenChromosome2Index = _.random(0, intervals.length-1);
+    let chosenGeneIndex = _.random(0, intervals[0].length-1);
+    let chosenChromosome1 = intervals[chosenChromosome1Index];
+    let chosenChromosome2 = intervals[chosenChromosome2Index];
+    let temp = chosenChromosome1[chosenGeneIndex];
+    
+    chosenChromosome1[chosenGeneIndex] = chosenChromosome2[chosenGeneIndex];
+    chosenChromosome2[chosenGeneIndex] = temp;
+  }
+
+  return intervals;
+}
+
+function _calculateMSE(initialArr, crossoverArr) {
+  let MSEarr = [];
+
+  for(let i=0; i<crossoverArr.length; i++) {
+    const initialChromosome = initialArr[i];
+    const resultChromosome = crossoverArr[i];
+    let MSE = 0;
+    
+    for(let j=0; j<initialChromosome.length; j++) {
+      let initialGene = initialChromosome[j];
+      let resultGene = resultChromosome[j];
+      MSE += Math.round(Math.pow(resultGene-initialGene, 2)/initialChromosome.length);
+    }
+    MSEarr.push(MSE);
+  }
+
+  return MSEarr;
+}
+
+function _assignMSE(crossoverArr, MSEarr) {
+  for(let i=0; i<crossoverArr.length; i++) {
+    crossoverArr[i].push(MSEarr[i]);
+  }
+
+  return crossoverArr;
+}
+
+function _optimize(crossoverArr) {
+  const sortedArr =  _.sortBy(crossoverArr, [ genesArr => { return genesArr[6] }]);
+  sortedArr.length = 20;
+  const newGenerationArr = _generatePredictedData(10);
+  //ошибка в этом методе, как-то неправильно генеришь новый массив из 10 элементов, проверь все плиз
+  let newCrossoverArr = _crossOver(newGenerationArr);
+  const newMSEarr = _calculateMSE(newGenerationArr, newCrossoverArr);
+  newCrossoverArr = _assignMSE(newCrossoverArr, newMSEarr);
+  console.log("///////", newCrossoverArr);
 }
 
 module.exports = Controller;
